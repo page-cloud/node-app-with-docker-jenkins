@@ -11,7 +11,7 @@ pipeline {
 
     stage('Checkout Source') {
       steps {
-        git 'https://github.com/mdrajibkhan/nodeapp_test.git'
+        git branch: 'staging', url: 'https://github.com/page-cloud/node-app-with-docker-jenkins.git'
       }
     }
 
