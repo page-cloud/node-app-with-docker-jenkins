@@ -1,49 +1,53 @@
 pipeline {
-
-  environment {
-    dockerimagename = "mdrajibkhan/nodeapp:v1"
-    dockerImage = ""
-  }
-
   agent any
-
   stages {
-
     stage('Checkout Source') {
       steps {
-        git branch: 'staging', url: 'https://github.com/page-cloud/node-app-with-docker-jenkins.git'
+        git(branch: 'staging', url: 'https://github.com/page-cloud/node-app-with-docker-jenkins.git')
       }
     }
 
     stage('Build image') {
-      steps{
+      steps {
         script {
           dockerImage = docker.build dockerimagename
         }
+
       }
     }
 
     stage('Pushing Image') {
       environment {
-               registryCredential = 'docker-test'
-           }
-      steps{
+        registryCredential = 'docker-test'
+      }
+      steps {
         script {
           docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
             dockerImage.push("latest")
           }
         }
+
       }
     }
 
     stage('Deploying App to Kubernetes') {
       steps {
         script {
-          kubernetesDeploy configs: "deploymentservice.yml", kubeconfigId: "kubernetes" 
+          kubernetesDeploy configs: "deploymentservice.yml", kubeconfigId: "kubernetes"
         }
+
+      }
+    }
+
+    stage('Alert') {
+      steps {
+        sh 'echo "Alerting"'
       }
     }
 
   }
-
+  environment {
+    dockerimagename = 'mdrajibkhan/nodeapp:v1'
+    dockerImage = ''
+  }
 }
